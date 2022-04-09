@@ -37,13 +37,11 @@ public class BaseClass {
 
 		@SubscribeEvent
 		public static void logoutEvent(PlayerEvent.PlayerLoggedOutEvent event){
-			System.out.println("logout");
 			Config.writeConfigToDisk(PATH_CONFIG, "config.json");
 		}
 
 		@SubscribeEvent
 		public static void loginEvent(PlayerEvent.PlayerLoggedInEvent event){
-			System.out.println("login");
 			Config.readConfigToMemory(PATH_CONFIG, "config.json");
 		}
 	}
