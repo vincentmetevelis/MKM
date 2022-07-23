@@ -17,7 +17,7 @@ public class Config {
     private static String macro6 = "";
     private static String macro7 = "";
     private static String macro8 = "";
-    public static String macro9 = "";
+    private static String macro9 = "";
 
     public static void processJson(JsonObject json){
         if(json.has("macro0")){
