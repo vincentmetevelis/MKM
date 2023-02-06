@@ -1,4 +1,4 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.utils;
 
 public class XYWidthHeight{
     private final int x, y, width, height;

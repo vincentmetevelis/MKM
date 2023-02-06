@@ -1,6 +1,9 @@
 {
   "mkm.keys.macros": "Macros",
   "mkm.keys.editor": "Open Macro Editor",
+  "mkm.keys.macroset_selection": "Macroset Selection",
+  "mkm.keys.next_macroset": "Next Macroset",
+  "mkm.keys.prev_macroset": "Previous Macroset",
   "mkm.keys.macro0": "Macro 0",
   "mkm.keys.macro1": "Macro 1",
   "mkm.keys.macro2": "Macro 2",
@@ -10,5 +13,8 @@
   "mkm.keys.macro6": "Macro 6",
   "mkm.keys.macro7": "Macro 7",
   "mkm.keys.macro8": "Macro 8",
-  "mkm.keys.macro9": "Macro 9"
+  "mkm.keys.macro9": "Macro 9",
+  "mkm.text.macro_set": "Macro set: ",
+  "mkm.text.switched_to_macro_set": "Now using macro set: %s",
+  "mkm.text.saved_macros_to_file": "Saved macros in config file!"
 }

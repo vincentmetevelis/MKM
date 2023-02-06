@@ -1,26 +1,27 @@
 package com.vincentmet.mkm;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.mkm.rendering.GLScissorStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import org.lwjgl.glfw.GLFW;
 import java.util.function.IntSupplier;
 
 public class SingleLineTextField{
-    private int x, y, width, height;
+    private IntSupplier x, y, width, height;
     private final int backgroundColor, borderColor, cursorColor, textColor;
     
     //Textarea including border
-    private final IntSupplier TEXTBOX_X = () -> x;
-    private final IntSupplier TEXTBOX_Y = () -> y;
-    private final IntSupplier TEXTBOX_WIDTH = () -> width;
-    private final IntSupplier TEXTBOX_HEIGHT = () -> height;
+    private final IntSupplier TEXTBOX_X = () -> x.getAsInt();
+    private final IntSupplier TEXTBOX_Y = () -> y.getAsInt();
+    private final IntSupplier TEXTBOX_WIDTH = () -> width.getAsInt();
+    private final IntSupplier TEXTBOX_HEIGHT = () -> height.getAsInt();
     
     //Textarea excluding border
-    private final IntSupplier INSIDE_BOX_X = () -> x+1;
-    private final IntSupplier INSIDE_BOX_Y = () -> y+1;
-    private final IntSupplier INSIDE_BOX_WIDTH = () -> width-2;
-    private final IntSupplier INSIDE_BOX_HEIGHT = () -> height-2;
+    private final IntSupplier INSIDE_BOX_X = () -> x.getAsInt()+1;
+    private final IntSupplier INSIDE_BOX_Y = () -> y.getAsInt()+1;
+    private final IntSupplier INSIDE_BOX_WIDTH = () -> width.getAsInt()-2;
+    private final IntSupplier INSIDE_BOX_HEIGHT = () -> height.getAsInt()-2;
     
     //Textarea text only
     private final IntSupplier TEXTAREA_X = () -> INSIDE_BOX_X.getAsInt() + 1;
@@ -33,8 +34,10 @@ public class SingleLineTextField{
     private int offset = 0;
     private int cursorPos;
     private boolean isFocused = false;
+
+    private String lastValue = "";
     
-    public SingleLineTextField(int x, int y, int width, int height, int backgroundColor, int borderColor, int cursorColor, int textColor, String initialText){
+    public SingleLineTextField(IntSupplier x, IntSupplier y, IntSupplier width, IntSupplier height, int backgroundColor, int borderColor, int cursorColor, int textColor, String initialText){
         this.x = x;
         this.y = y;
         this.width = width;
@@ -44,6 +47,7 @@ public class SingleLineTextField{
         this.cursorColor = cursorColor;
         this.textColor = textColor;
         this.text = initialText;
+        this.lastValue = this.text;
         this.setToMaxCursorPos();
     }
 
@@ -109,6 +113,7 @@ public class SingleLineTextField{
     }
 
     public boolean setText(String newText){
+        lastValue = text;
         text = newText;
         return false;
     }
@@ -256,19 +261,23 @@ public class SingleLineTextField{
         return text;
     }
 
-    public void setX(int x) {
+    public void setX(IntSupplier x) {
         this.x = x;
     }
 
-    public void setY(int y) {
+    public void setY(IntSupplier y) {
         this.y = y;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(IntSupplier width) {
         this.width = width;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(IntSupplier height) {
         this.height = height;
+    }
+
+    public String getLastValue() {
+        return lastValue;
     }
 }

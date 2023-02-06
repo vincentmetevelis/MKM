@@ -1,4 +1,4 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.utils;
 
 public enum MouseButton {
     LEFT,

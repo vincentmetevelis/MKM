@@ -1,6 +1,8 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.rendering;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.mkm.utils.XYWidthHeight;
+
 import java.util.LinkedList;
 
 public class GLScissorStack{

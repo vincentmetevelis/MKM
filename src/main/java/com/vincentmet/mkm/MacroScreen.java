@@ -1,43 +1,118 @@
 package com.vincentmet.mkm;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.mkm.rendering.GLScissorStack;
+import com.vincentmet.mkm.rendering.ScrollingLabel;
+import com.vincentmet.mkm.utils.IntCounter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.IntSupplier;
 
 public class MacroScreen extends Screen {
     private int scrollDistance = 0;
+    private static final Component MACRO_SET = new TranslatableComponent("mkm.text.macro_set");
+    private final List<SingleLineTextField> ALL_FIELDS = new ArrayList<>();
 
     private final IntSupplier dataContainerX = ()->20;
     private final IntSupplier dataContainerY = ()->20;
     private final IntSupplier dataContainerWidth = ()->width-40;
     private final IntSupplier dataContainerHeight = ()->height-40;
 
+    private VariableButton buttonSaveAll;
+    private final IntSupplier buttonSaveAllX = ()->20;
+    private final IntSupplier buttonSaveAllY = ()->0;
+    private final IntSupplier buttonSaveAllWidth = ()->40;
+    private final IntSupplier buttonSaveAllHeight = ()->20;
+
+    private String lastLabelText = MACRO_SET.getString();
+    private ScrollingLabel labelWhichSet;
+    private final IntSupplier labelX = ()->60+2;
+    private final IntSupplier labelY = ()->(20>>1)-(font.lineHeight>>1);
+    private final IntSupplier labelWidth = ()-> 80-4;
+    private final IntSupplier labelHeight = ()-> 20;
+
+    private VariableButton buttonAddNewSet;
+    private final IntSupplier buttonAddNewSetX = ()->width-120;
+    private final IntSupplier buttonAddNewSetY = ()->0;
+    private final IntSupplier buttonAddNewSetWidth = ()-> 20;
+    private final IntSupplier buttonAddNewSetHeight = ()-> 20;
+
+    private VariableButton buttonRemoveCurrentSet;
+    private final IntSupplier buttonRemoveCurrentSetX = ()->width-100;
+    private final IntSupplier buttonRemoveCurrentSetY = ()->0;
+    private final IntSupplier buttonRemoveCurrentSetWidth = ()-> 20;
+    private final IntSupplier buttonRemoveCurrentSetHeight = ()-> 20;
+
+    private VariableButton buttonPrev;
+    private final IntSupplier buttonPrevX = ()->width-60;
+    private final IntSupplier buttonPrevY = ()->0;
+    private final IntSupplier buttonPrevWidth = ()-> 20;
+    private final IntSupplier buttonPrevHeight = ()-> 20;
+
+    private VariableButton buttonNext;
+    private final IntSupplier buttonNextX = ()->width-40;
+    private final IntSupplier buttonNextY = ()->0;
+    private final IntSupplier buttonNextWidth = ()-> 20;
+    private final IntSupplier buttonNextHeight = ()-> 20;
+
     public MacroScreen() {
         super(new TextComponent("MKM"));
+        IntCounter y = new IntCounter(dataContainerY.getAsInt(), 20);
         for (MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
-            keybind.getCommandTextLine().setText(keybind.getConfigValue());
+            final int finalY = y.getValue();
+            ALL_FIELDS.add(new SingleLineTextField(()->(width>>1), ()->finalY, ()->(dataContainerWidth.getAsInt()>>1), ()->20, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, keybind.getMacroGetterValue()));
+            y.count();
         }
+        buttonSaveAll = new VariableButton(buttonSaveAllX, buttonSaveAllY, buttonSaveAllWidth, buttonSaveAllHeight, new TranslatableComponent("selectWorld.edit.save").getString(), VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
+            IntCounter i = new IntCounter();
+            for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
+                keybind.setConfig(ALL_FIELDS.get(i.getValue()).getText());
+                i.count();
+            }
+            Config.writeConfigToDiskWithModFiles();
+            if(Minecraft.getInstance().player!=null) Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mkm.text.saved_macros_to_file"), false);
+        });
+        labelWhichSet = new ScrollingLabel(labelX, labelY, MACRO_SET.getString() + MacroManager.getCurrentMacroSetId(), labelWidth, 5, 1);
+        buttonRemoveCurrentSet = new VariableButton(buttonRemoveCurrentSetX, buttonRemoveCurrentSetY, buttonRemoveCurrentSetWidth, buttonRemoveCurrentSetHeight, "-", VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
+            MacroManager.removeMacroSet(MacroManager.getCurrentMacroSetId());
+            MacroManager.setCurrentMacroSetId(0);
+            Config.writeConfigToDiskWithModFiles();
+        });
+        buttonAddNewSet = new VariableButton(buttonAddNewSetX, buttonAddNewSetY, buttonAddNewSetWidth, buttonAddNewSetHeight, "+", VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
+            MacroManager.addNewEmptyMacroSet();
+            MacroManager.setCurrentMacroSetId(MacroManager.getAllMacros().size()-1);
+            Config.writeConfigToDiskWithModFiles();
+        });
+        buttonPrev = new VariableButton(buttonPrevX, buttonPrevY, buttonPrevWidth, buttonPrevHeight, "<", VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
+            MacroManager.usePreviousMacroset();
+        });
+        buttonNext = new VariableButton(buttonNextX, buttonNextY, buttonNextWidth, buttonNextHeight, ">", VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
+            MacroManager.useNextMacroset();
+        });
     }
 
     @Override
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         fill(stack, 0, 0, width, height, 0x88000000);
         fill(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerX.getAsInt() + dataContainerWidth.getAsInt(), dataContainerY.getAsInt() + dataContainerHeight.getAsInt(), 0x88000000);
-
+        buttonPrev.render(stack, mouseX, mouseY, partialTicks);
+        labelWhichSet.render(stack, mouseX, mouseY, partialTicks);
+        buttonAddNewSet.render(stack, mouseX, mouseY, partialTicks);
+        buttonRemoveCurrentSet.render(stack, mouseX, mouseY, partialTicks);
+        buttonNext.render(stack, mouseX, mouseY, partialTicks);
+        buttonSaveAll.render(stack, mouseX, mouseY, partialTicks);
         GLScissorStack.push(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerWidth.getAsInt(), dataContainerHeight.getAsInt());
         int i = 0;
         for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
             int localY = dataContainerY.getAsInt() - scrollDistance + 20*i;
-            keybind.getCommandTextLine().setX(width>>1);
-            keybind.getCommandTextLine().setY(localY);
-            keybind.getCommandTextLine().setWidth((dataContainerWidth.getAsInt()>>1)-20);
-            keybind.getCommandTextLine().setHeight(20);
-            keybind.getSaveButton().setX(dataContainerX.getAsInt() + dataContainerWidth.getAsInt() - 20);
-            keybind.getSaveButton().setY(localY);
-            drawString(stack, font, keybind.getTranslation(), dataContainerX.getAsInt() + 20, localY + (20/2 - font.lineHeight/2), 0xFFFFFF);
-            keybind.getCommandTextLine().render(stack, mouseX, mouseY, partialTicks);
-            keybind.getSaveButton().render(stack, mouseX, mouseY, partialTicks);
+            drawString(stack, font, keybind.getTranslation(), dataContainerX.getAsInt() + 20, localY + ((20>>1) - (font.lineHeight>>1)), 0xFFFFFF);
+            ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.render(stack, mouseX, mouseY, partialTicks));
             i++;
         }
         GLScissorStack.pop(stack);
@@ -45,10 +120,12 @@ public class MacroScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
-            keybind.getCommandTextLine().mouseClicked(mouseX, mouseY, button);
-            keybind.getSaveButton().mouseClicked(mouseX, mouseY, button);
-        }
+        buttonAddNewSet.mouseClicked(mouseX, mouseY, button);
+        buttonRemoveCurrentSet.mouseClicked(mouseX, mouseY, button);
+        buttonPrev.mouseClicked(mouseX, mouseY, button);
+        buttonNext.mouseClicked(mouseX, mouseY, button);
+        buttonSaveAll.mouseClicked(mouseX, mouseY, button);
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseClicked(mouseX, mouseY, button));
         return true;
     }
 
@@ -57,17 +134,13 @@ public class MacroScreen extends Screen {
         if (keyCode == 256 && this.shouldCloseOnEsc()) {
             this.onClose();
         }
-        for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
-            keybind.getCommandTextLine().keyPressed(keyCode, scanCode, modifiers);
-        }
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.keyPressed(keyCode, scanCode, modifiers));
         return true;
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
-        for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
-            keybind.getCommandTextLine().charTyped(codePoint, modifiers);
-        }
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.charTyped(codePoint, modifiers));
         return true;
     }
 

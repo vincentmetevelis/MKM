@@ -1,4 +1,4 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.rendering;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 

@@ -3,6 +3,8 @@ package com.vincentmet.mkm;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.mkm.rendering.Color;
+import com.vincentmet.mkm.utils.MouseButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -13,21 +15,23 @@ import java.util.function.IntSupplier;
 
 @OnlyIn(Dist.CLIENT)
 public class VariableButton {
-	private int x, y, width, height;
+	private IntSupplier x, y, width, height;
+	private String text;
 	private ButtonTexture texture;
 	private Consumer<MouseButton> onClickCallback;
 	
-	public VariableButton(int x, int y, int width, int height, ButtonTexture texture, Consumer<MouseButton> onClickCallback){
+	public VariableButton(IntSupplier x, IntSupplier y, IntSupplier width, IntSupplier height, String text, ButtonTexture texture, Consumer<MouseButton> onClickCallback){
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		this.text = text;
 		this.texture = texture;
 		this.onClickCallback = onClickCallback;
 	}
 	
 	private IntSupplier getMaxTextWidth(){
-		return ()->width;
+		return width;
 	}
 	
 	private int getStringWidth(){
@@ -50,42 +54,42 @@ public class VariableButton {
 
 		RenderSystem.setShaderTexture(0, texture.getTexture());
 		
-		int right = x + width - texP;
-		int bottom = y + height - texP;
+		int right = x.getAsInt() + width.getAsInt() - texP;
+		int bottom = y.getAsInt() + height.getAsInt() - texP;
 		int texRight = texU + texture.getWidth() - texP;
 		int texBottom = texV + texture.getWidth() - texP;
 		
-		GuiComponent.blit(matrixStack, x, y, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
-		GuiComponent.blit(matrixStack, right, y, texRight, texV, texP, texP, texWidth, texHeight);// Right Top corner
+		GuiComponent.blit(matrixStack, x.getAsInt(), y.getAsInt(), texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
+		GuiComponent.blit(matrixStack, right, y.getAsInt(), texRight, texV, texP, texP, texWidth, texHeight);// Right Top corner
 		GuiComponent.blit(matrixStack, right, bottom, texRight, texBottom, texP, texP, texWidth, texHeight);// Right Bottom corner
-		GuiComponent.blit(matrixStack, x, bottom, texU, texBottom, texP, texP, texWidth, texHeight);// Left Bottom corner
+		GuiComponent.blit(matrixStack, x.getAsInt(), bottom, texU, texBottom, texP, texP, texWidth, texHeight);// Left Bottom corner
 		
 		
 		int strippedButtonTexWidth = texture.getWidth() - 2*texP;
 		int strippedButtonTexHeight = texture.getHeight() - 2*texP;
 		
-		for (int left = x + texP; left < right; left += strippedButtonTexWidth) {// Fill the Middle
-			for (int top = y + texP; top < bottom; top += strippedButtonTexHeight) {
+		for (int left = x.getAsInt() + texP; left < right; left += strippedButtonTexWidth) {// Fill the Middle
+			for (int top = y.getAsInt() + texP; top < bottom; top += strippedButtonTexHeight) {
 				GuiComponent.blit(matrixStack, left, top, texU + texP, texV + texP, Math.min(strippedButtonTexWidth, right - left), Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);
 			}
 		}
-		for (int left = x + texP; left < right; left += strippedButtonTexWidth) {// Top and Bottom Edges
-			GuiComponent.blit(matrixStack, left, y, texU + texP, texV, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Top
+		for (int left = x.getAsInt() + texP; left < right; left += strippedButtonTexWidth) {// Top and Bottom Edges
+			GuiComponent.blit(matrixStack, left, y.getAsInt(), texU + texP, texV, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Top
 			GuiComponent.blit(matrixStack, left, bottom, texU + texP, texBottom, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Bottom
 		}
-		for (int top = y + texP; top < bottom; top += strippedButtonTexHeight) {// Left and Right Edges
-			GuiComponent.blit(matrixStack, x, top, texU, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Left
+		for (int top = y.getAsInt() + texP; top < bottom; top += strippedButtonTexHeight) {// Left and Right Edges
+			GuiComponent.blit(matrixStack, x.getAsInt(), top, texU, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Left
 			GuiComponent.blit(matrixStack, right, top, texRight, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Right
 		}
-		Minecraft.getInstance().font.draw(matrixStack, getButtonText(), x + (width>>1) - (getStringWidth()>>1), y + (height>>1) - (Minecraft.getInstance().font.lineHeight>>1), 0xFFFFFF);
+		Minecraft.getInstance().font.draw(matrixStack, getButtonText(), x.getAsInt() + (width.getAsInt()>>1) - (getStringWidth()>>1), y.getAsInt() + (height.getAsInt()>>1) - (Minecraft.getInstance().font.lineHeight>>1), 0xFFFFFF);
 
-		if(MacroScreen.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height) && texture == ButtonTexture.DEFAULT_NORMAL){
+		if(MacroScreen.isMouseInBounds(mouseX, mouseY, x.getAsInt(), y.getAsInt(), x.getAsInt()+width.getAsInt(), y.getAsInt()+height.getAsInt()) && texture == ButtonTexture.DEFAULT_NORMAL){
 			internalRender(matrixStack, mouseX, mouseY, partialTicks, ButtonTexture.DEFAULT_PRESSED);
 		}
 	}
 	
 	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton){
-		if(MacroScreen.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height)){
+		if(MacroScreen.isMouseInBounds(mouseX, mouseY, x.getAsInt(), y.getAsInt(), x.getAsInt()+width.getAsInt(), y.getAsInt()+height.getAsInt())){
 			if(onClickCallback != null){
 				onClickCallback.accept(MouseButton.getButtonFromGlButton(mouseButton));
 				return true;
@@ -94,19 +98,19 @@ public class VariableButton {
 		return false;
 	}
 	
-	public int getX(){
+	public IntSupplier getX(){
 		return x;
 	}
 	
-	public int getY(){
+	public IntSupplier getY(){
 		return y;
 	}
 	
-	public int getWidth(){
+	public IntSupplier getWidth(){
 		return width;
 	}
 	
-	public int getHeight(){
+	public IntSupplier getHeight(){
 		return height;
 	}
 	
@@ -115,26 +119,26 @@ public class VariableButton {
 	}
 	
 	public String getButtonText(){
-		return "S";
+		return text;
 	}
 	
 	public Consumer<MouseButton> getOnClickCallback(){
 		return onClickCallback;
 	}
 	
-	public void setX(int x){
+	public void setX(IntSupplier x){
 		this.x = x;
 	}
 	
-	public void setY(int y){
+	public void setY(IntSupplier y){
 		this.y = y;
 	}
 	
-	public void setWidth(int width){
+	public void setWidth(IntSupplier width){
 		this.width = width;
 	}
 	
-	public void setHeight(int height){
+	public void setHeight(IntSupplier height){
 		this.height = height;
 	}
 	
