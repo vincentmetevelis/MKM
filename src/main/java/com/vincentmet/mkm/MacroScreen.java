@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,7 @@ public class MacroScreen extends Screen {
         IntCounter y = new IntCounter(dataContainerY.getAsInt(), 20);
         for (MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
             final int finalY = y.getValue();
-            ALL_FIELDS.add(new SingleLineTextField(()->(width>>1), ()->finalY, ()->(dataContainerWidth.getAsInt()>>1), ()->20, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, keybind.getMacroGetterValue()));
+            ALL_FIELDS.add(new SingleLineTextField(()->(width>>1), ()->finalY, ()->(dataContainerWidth.getAsInt()>>1), ()->20, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFEE00EE, keybind.getMacroGetterValue()));//todo set better selection color
             y.count();
         }
         buttonSaveAll = new VariableButton(buttonSaveAllX, buttonSaveAllY, buttonSaveAllWidth, buttonSaveAllHeight, new TranslatableComponent("selectWorld.edit.save").getString(), VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
@@ -131,7 +132,7 @@ public class MacroScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256 && this.shouldCloseOnEsc()) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
             this.onClose();
         }
         ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.keyPressed(keyCode, scanCode, modifiers));
@@ -146,11 +147,35 @@ public class MacroScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double dyScroll) {
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseScrolled(mouseX, mouseY, dyScroll));
         if(isMouseInBounds(mouseX, mouseY, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerX.getAsInt() + dataContainerWidth.getAsInt(), dataContainerY.getAsInt() + dataContainerHeight.getAsInt())){
             scrollDistance -= dyScroll*getScrollAmount();
         }
         applyScrollLimits();
         return true;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseReleased(mouseX, mouseY, button));
+        return true;
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseDragged(mouseX, mouseY, button, dx, dy));
+        return true;
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.keyReleased(keyCode, scanCode, modifiers));
+        return true;
+    }
+
+    @Override
+    public void mouseMoved(double dx, double dy) {
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseMoved(dx, dy));
     }
 
     public int getContentHeight(){

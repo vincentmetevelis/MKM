@@ -1,14 +1,11 @@
 package com.vincentmet.mkm;
 
 import com.google.gson.*;
-import net.minecraft.client.Minecraft;
-import org.lwjgl.system.CallbackI;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Supplier;
 
 public class Config {
 

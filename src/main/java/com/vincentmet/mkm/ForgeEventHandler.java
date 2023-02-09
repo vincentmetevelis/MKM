@@ -4,7 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -20,16 +19,6 @@ public class ForgeEventHandler{
             if(Keybinds.NEXT_MACROSET.consumeClick()) MacroManager.useNextMacroset();
             Keybinds.getAllMacros().forEach(macroKeybindWrapper -> {if(macroKeybindWrapper.consumeClick()) Minecraft.getInstance().player.chat("/" + macroKeybindWrapper.getMacroGetterValue());});
         }
-    }
-
-    @SubscribeEvent
-    public static void logoutEvent(PlayerEvent.PlayerLoggedOutEvent event){
-        Config.writeConfigToDiskWithModFiles();
-    }
-
-    @SubscribeEvent
-    public static void loginEvent(PlayerEvent.PlayerLoggedInEvent event){
-        Config.readConfigToMemoryWithModFiles();
     }
 
     @SubscribeEvent
