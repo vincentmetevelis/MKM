@@ -21,7 +21,6 @@ public class BaseClass {
 	}
 	
 	private void setupClient(final FMLClientSetupEvent event){
-    	Keybinds.registerKeybinds();
 		Config.readConfigToMemoryWithModFiles();
 	}
 }

@@ -63,8 +63,8 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:${property('mc.version')}-${property('forge.version')}"
 
-    compileOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}:${property('jei.version')}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}:${property('jei.version')}")
+    compileOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}-forge-api:${property('jei.version')}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}-forge:${property('jei.version')}")
 
     implementation 'com.intellij:annotations:+@jar'
 }

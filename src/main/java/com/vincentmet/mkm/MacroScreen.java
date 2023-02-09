@@ -7,8 +7,7 @@ import com.vincentmet.mkm.utils.IntCounter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraftforge.common.util.Lazy;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import java.util.function.IntSupplier;
 
 public class MacroScreen extends Screen {
     private int scrollDistance = 0;
-    private static final Component MACRO_SET = new TranslatableComponent("mkm.text.macro_set");
+    private static final Component MACRO_SET = Component.translatable("mkm.text.macro_set");
     private final List<SingleLineTextField> ALL_FIELDS = new ArrayList<>();
 
     private final IntSupplier dataContainerX = ()->20;
@@ -63,21 +62,21 @@ public class MacroScreen extends Screen {
     private final IntSupplier buttonNextHeight = ()-> 20;
 
     public MacroScreen() {
-        super(new TextComponent("MKM"));
+        super(Component.literal("MKM"));
         IntCounter y = new IntCounter(dataContainerY.getAsInt(), 20);
-        for (MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
+        for (Lazy<MacroKeybindWrapper> keybind : Keybinds.getAllMacros()){
             final int finalY = y.getValue();
-            ALL_FIELDS.add(new SingleLineTextField(()->(width>>1), ()->finalY, ()->(dataContainerWidth.getAsInt()>>1), ()->20, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFEE00EE, keybind.getMacroGetterValue()));//todo set better selection color
+            ALL_FIELDS.add(new SingleLineTextField(()->(width>>1), ()->finalY, ()->(dataContainerWidth.getAsInt()>>1), ()->20, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFEE00EE, keybind.get().getMacroGetterValue()));//todo set better selection color
             y.count();
         }
-        buttonSaveAll = new VariableButton(buttonSaveAllX, buttonSaveAllY, buttonSaveAllWidth, buttonSaveAllHeight, new TranslatableComponent("selectWorld.edit.save").getString(), VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
+        buttonSaveAll = new VariableButton(buttonSaveAllX, buttonSaveAllY, buttonSaveAllWidth, buttonSaveAllHeight, Component.translatable("selectWorld.edit.save").getString(), VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
             IntCounter i = new IntCounter();
-            for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
-                keybind.setConfig(ALL_FIELDS.get(i.getValue()).getText());
+            for(Lazy<MacroKeybindWrapper> keybind : Keybinds.getAllMacros()){
+                keybind.get().setConfig(ALL_FIELDS.get(i.getValue()).getText());
                 i.count();
             }
             Config.writeConfigToDiskWithModFiles();
-            if(Minecraft.getInstance().player!=null) Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mkm.text.saved_macros_to_file"), false);
+            if(Minecraft.getInstance().player!=null) Minecraft.getInstance().player.displayClientMessage(Component.translatable("mkm.text.saved_macros_to_file"), false);
         });
         labelWhichSet = new ScrollingLabel(labelX, labelY, MACRO_SET.getString() + MacroManager.getCurrentMacroSetId(), labelWidth, 5, 1);
         buttonRemoveCurrentSet = new VariableButton(buttonRemoveCurrentSetX, buttonRemoveCurrentSetY, buttonRemoveCurrentSetWidth, buttonRemoveCurrentSetHeight, "-", VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
@@ -110,9 +109,9 @@ public class MacroScreen extends Screen {
         buttonSaveAll.render(stack, mouseX, mouseY, partialTicks);
         GLScissorStack.push(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerWidth.getAsInt(), dataContainerHeight.getAsInt());
         int i = 0;
-        for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
+        for(Lazy<MacroKeybindWrapper> keybind : Keybinds.getAllMacros()){
             int localY = dataContainerY.getAsInt() - scrollDistance + 20*i;
-            drawString(stack, font, keybind.getTranslation(), dataContainerX.getAsInt() + 20, localY + ((20>>1) - (font.lineHeight>>1)), 0xFFFFFF);
+            drawString(stack, font, keybind.get().getTranslation(), dataContainerX.getAsInt() + 20, localY + ((20>>1) - (font.lineHeight>>1)), 0xFFFFFF);
             ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.render(stack, mouseX, mouseY, partialTicks));
             i++;
         }
