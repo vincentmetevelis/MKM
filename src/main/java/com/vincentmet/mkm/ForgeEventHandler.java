@@ -18,12 +18,7 @@ public class ForgeEventHandler{
             if(OPEN_EDITOR.get().consumeClick()) Minecraft.getInstance().setScreen(new MacroScreen());
             if(PREV_MACROSET.get().consumeClick()) MacroManager.usePreviousMacroset();
             if(NEXT_MACROSET.get().consumeClick()) MacroManager.useNextMacroset();
-            Keybinds.getAllMacros().forEach(macroKeybindWrapper -> {
-                if(macroKeybindWrapper.get().consumeClick()){
-                    String command = macroKeybindWrapper.get().getMacroGetterValue();
-                    Minecraft.getInstance().player.commandSigned(command, Component.empty());
-                }
-            });
+            Keybinds.getAllMacros().forEach(macroKeybindWrapper -> {if(macroKeybindWrapper.get().consumeClick()) Minecraft.getInstance().player.command(macroKeybindWrapper.get().getMacroGetterValue());});
         }
     }
 
