@@ -21,7 +21,7 @@ public class ForgeEventHandler{
             Keybinds.getAllMacros().forEach(macroKeybindWrapper -> {
                 if(macroKeybindWrapper.get().consumeClick()){
                     String command = macroKeybindWrapper.get().getMacroGetterValue();
-                    Minecraft.getInstance().player.commandSigned(command, Component.empty());
+                    Minecraft.getInstance().player.connection.sendCommand(command);
                 }
             });
         }
