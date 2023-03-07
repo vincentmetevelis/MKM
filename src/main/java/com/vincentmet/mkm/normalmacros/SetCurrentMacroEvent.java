@@ -1,4 +1,4 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.normalmacros;
 
 import net.minecraftforge.eventbus.api.Event;
 

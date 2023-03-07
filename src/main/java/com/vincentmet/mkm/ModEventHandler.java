@@ -1,5 +1,6 @@
 package com.vincentmet.mkm;
 
+import com.vincentmet.mkm.normalmacros.MacroKeybindWrapper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.util.Lazy;
@@ -7,7 +8,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import static com.vincentmet.mkm.BaseClass.MODID;
-import static com.vincentmet.mkm.Keybinds.*;
+import static com.vincentmet.mkm.normalmacros.Keybinds.*;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEventHandler {

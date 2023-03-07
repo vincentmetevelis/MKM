@@ -11,8 +11,10 @@ public class ScrollingLabel implements IRenderable{
     
     private IntSupplier x, y;
     private String text;
+    private int parentScrollingDistance = 0;
     private final IntSupplier maxWidth;
-    private int beginEndPauseDuration, scrollingSpeed, textWidth, maxOffset;
+    private IntSupplier textWidth, maxOffset;
+    private int beginEndPauseDuration, scrollingSpeed;
     
     public ScrollingLabel(IntSupplier x, IntSupplier y, String text, IntSupplier maxWidth, int beginEndPauseDuration, int scrollingSpeed){//beginEndPauseDuration in ticks // scrollingSpeed calculated as: 1/x
         this.x = x;
@@ -22,28 +24,32 @@ public class ScrollingLabel implements IRenderable{
         this.beginEndPauseDuration = beginEndPauseDuration;
         this.scrollingSpeed = scrollingSpeed;
     
-        this.textWidth = FONT.width(text);
-        this.maxOffset = this.textWidth - this.maxWidth.getAsInt();
+        this.textWidth = ()->FONT.width(text);
+        this.maxOffset = ()->(this.textWidth.getAsInt() - this.maxWidth.getAsInt());
     }
     
     @Override
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        GLScissorStack.push(matrixStack, x.getAsInt(), y.getAsInt(), maxWidth.getAsInt(), FONT.lineHeight);
-        if(this.maxOffset >= 0){
-            int currentOffset = Math.min((int)((System.currentTimeMillis()/50/scrollingSpeed)%(textWidth+beginEndPauseDuration*2)), maxOffset + 2*this.beginEndPauseDuration);
+        GLScissorStack.push(matrixStack, x.getAsInt(), y.getAsInt() - parentScrollingDistance, maxWidth.getAsInt(), FONT.lineHeight);
+        if(this.maxOffset.getAsInt() >= 0){
+            int currentOffset = Math.min((int)((System.currentTimeMillis()/50/scrollingSpeed)%(textWidth.getAsInt()+beginEndPauseDuration*2)), maxOffset.getAsInt() + 2*this.beginEndPauseDuration);
             int localOffsetPause;
             if(currentOffset < beginEndPauseDuration){
                 localOffsetPause = 0;
             }else{
-                localOffsetPause = Math.min(currentOffset - beginEndPauseDuration, maxOffset);
+                localOffsetPause = Math.min(currentOffset - beginEndPauseDuration, maxOffset.getAsInt());
             }
-            FONT.drawShadow(matrixStack, text, x.getAsInt()-localOffsetPause, y.getAsInt(), 0xFFFFFF);//stack, text, x, y, color
+            FONT.drawShadow(matrixStack, text, x.getAsInt()-localOffsetPause, y.getAsInt() - parentScrollingDistance, 0xFFFFFF);//stack, text, x, y, color
         }else{
-            FONT.drawShadow(matrixStack, text, x.getAsInt(), y.getAsInt(), 0xFFFFFF);//stack, text, x, y, color
+            FONT.drawShadow(matrixStack, text, x.getAsInt(), y.getAsInt() - parentScrollingDistance, 0xFFFFFF);//stack, text, x, y, color
         }
         GLScissorStack.pop(matrixStack);
     }
-    
+
+    public void setParentScrollingDistance(int parentScrollingDistance) {
+        this.parentScrollingDistance = parentScrollingDistance;
+    }
+
     public IntSupplier getX(){
         return x;
     }
@@ -66,8 +72,8 @@ public class ScrollingLabel implements IRenderable{
 
     public void setText(String text){
         this.text = text;
-        this.textWidth = FONT.width(text);
-        this.maxOffset = this.textWidth - this.maxWidth.getAsInt();
+        this.textWidth = ()->FONT.width(text);
+        this.maxOffset = ()->(this.textWidth.getAsInt() - this.maxWidth.getAsInt());
     }
     
     public IntSupplier getWidth(){
