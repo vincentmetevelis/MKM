@@ -1,5 +1,6 @@
 package com.vincentmet.mkm;
 
+import com.vincentmet.mkm.normalmacros.Keybinds;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;

@@ -1,6 +1,10 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.normalmacros;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.mkm.Config;
+import com.vincentmet.mkm.utils.SingleLineTextField;
+import com.vincentmet.mkm.timedmacros.TimedMacroScreen;
+import com.vincentmet.mkm.utils.VariableButton;
 import com.vincentmet.mkm.rendering.GLScissorStack;
 import com.vincentmet.mkm.rendering.ScrollingLabel;
 import com.vincentmet.mkm.utils.IntCounter;
@@ -25,18 +29,22 @@ public class MacroScreen extends Screen {
     private final IntSupplier dataContainerWidth = ()->width-40;
     private final IntSupplier dataContainerHeight = ()->height-40;
 
+    private VariableButton buttonSwitchToTimedMacroScreen;
+    private final IntSupplier buttonSwitchToTimedMacroScreenX = ()->20;
+    private final IntSupplier buttonSwitchToTimedMacroScreenY = ()->0;
+    private final IntSupplier buttonSwitchToTimedMacroScreenWidth = ()->80;
+    private final IntSupplier buttonSwitchToTimedMacroScreenHeight = ()->20;
+
     private VariableButton buttonSaveAll;
-    private final IntSupplier buttonSaveAllX = ()->20;
+    private final IntSupplier buttonSaveAllX = ()->100;
     private final IntSupplier buttonSaveAllY = ()->0;
     private final IntSupplier buttonSaveAllWidth = ()->40;
     private final IntSupplier buttonSaveAllHeight = ()->20;
 
-    private String lastLabelText = MACRO_SET.getString();
     private ScrollingLabel labelWhichSet;
-    private final IntSupplier labelX = ()->60+2;
+    private final IntSupplier labelX = ()->140+2;
     private final IntSupplier labelY = ()->(20>>1)-(font.lineHeight>>1);
-    private final IntSupplier labelWidth = ()-> 80-4;
-    private final IntSupplier labelHeight = ()-> 20;
+    private final IntSupplier labelWidth = ()-> width-140-2-120-2;
 
     private VariableButton buttonAddNewSet;
     private final IntSupplier buttonAddNewSetX = ()->width-120;
@@ -67,9 +75,12 @@ public class MacroScreen extends Screen {
         IntCounter y = new IntCounter(dataContainerY.getAsInt(), 20);
         for (MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
             final int finalY = y.getValue();
-            ALL_FIELDS.add(new SingleLineTextField(()->(width>>1), ()->finalY, ()->(dataContainerWidth.getAsInt()>>1), ()->20, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFEE00EE, keybind.getMacroGetterValue()));//todo set better selection color
+            ALL_FIELDS.add(new SingleLineTextField(()->(width>>1), ()->finalY, ()->(dataContainerWidth.getAsInt()>>1), ()->20, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFEE00EE, keybind.getMacroGetterValue()));
             y.count();
         }
+        buttonSwitchToTimedMacroScreen = new VariableButton(buttonSwitchToTimedMacroScreenX, buttonSwitchToTimedMacroScreenY, buttonSwitchToTimedMacroScreenWidth, buttonSwitchToTimedMacroScreenHeight, new TranslatableComponent("mkm.text.timed_macros").getString(), VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
+            Minecraft.getInstance().setScreen(new TimedMacroScreen());
+        });
         buttonSaveAll = new VariableButton(buttonSaveAllX, buttonSaveAllY, buttonSaveAllWidth, buttonSaveAllHeight, new TranslatableComponent("selectWorld.edit.save").getString(), VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
             IntCounter i = new IntCounter();
             for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
@@ -79,7 +90,7 @@ public class MacroScreen extends Screen {
             Config.writeConfigToDiskWithModFiles();
             if(Minecraft.getInstance().player!=null) Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mkm.text.saved_macros_to_file"), false);
         });
-        labelWhichSet = new ScrollingLabel(labelX, labelY, MACRO_SET.getString() + MacroManager.getCurrentMacroSetId(), labelWidth, 5, 1);
+        labelWhichSet = new ScrollingLabel(labelX, labelY, MACRO_SET.getString() + MacroManager.getCurrentMacroSet().getName(), labelWidth, 5, 1);
         buttonRemoveCurrentSet = new VariableButton(buttonRemoveCurrentSetX, buttonRemoveCurrentSetY, buttonRemoveCurrentSetWidth, buttonRemoveCurrentSetHeight, "-", VariableButton.ButtonTexture.DEFAULT_NORMAL, mouseButton -> {
             MacroManager.removeMacroSet(MacroManager.getCurrentMacroSetId());
             MacroManager.setCurrentMacroSetId(0);
@@ -108,6 +119,7 @@ public class MacroScreen extends Screen {
         buttonRemoveCurrentSet.render(stack, mouseX, mouseY, partialTicks);
         buttonNext.render(stack, mouseX, mouseY, partialTicks);
         buttonSaveAll.render(stack, mouseX, mouseY, partialTicks);
+        buttonSwitchToTimedMacroScreen.render(stack, mouseX, mouseY, partialTicks);
         GLScissorStack.push(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerWidth.getAsInt(), dataContainerHeight.getAsInt());
         int i = 0;
         for(MacroKeybindWrapper keybind : Keybinds.getAllMacros()){
@@ -126,6 +138,7 @@ public class MacroScreen extends Screen {
         buttonPrev.mouseClicked(mouseX, mouseY, button);
         buttonNext.mouseClicked(mouseX, mouseY, button);
         buttonSaveAll.mouseClicked(mouseX, mouseY, button);
+        buttonSwitchToTimedMacroScreen.mouseClicked(mouseX, mouseY, button);
         ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseClicked(mouseX, mouseY, button));
         return true;
     }
@@ -147,11 +160,10 @@ public class MacroScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double dyScroll) {
-        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseScrolled(mouseX, mouseY, dyScroll));
         if(isMouseInBounds(mouseX, mouseY, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerX.getAsInt() + dataContainerWidth.getAsInt(), dataContainerY.getAsInt() + dataContainerHeight.getAsInt())){
-            scrollDistance -= dyScroll*getScrollAmount();
+            setScrollDistance((int)(scrollDistance - dyScroll*getScrollAmount()));
         }
-        applyScrollLimits();
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.mouseScrolled(mouseX, mouseY, dyScroll));
         return true;
     }
 
@@ -179,7 +191,7 @@ public class MacroScreen extends Screen {
     }
 
     public int getContentHeight(){
-        return Math.max(20*Keybinds.getAllMacros().size(), dataContainerHeight.getAsInt());
+        return 20*Keybinds.getAllMacros().size();
     }
 
     private int getMaxScroll(){
@@ -207,6 +219,7 @@ public class MacroScreen extends Screen {
     public void setScrollDistance(int scrollDistance) {
         this.scrollDistance = scrollDistance;
         applyScrollLimits();
+        ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.setScrollingDistance(getScrollDistance()));
     }
 
     @Override

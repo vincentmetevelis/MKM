@@ -1,4 +1,4 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.normalmacros;
 
 import com.google.gson.JsonObject;
 import net.minecraftforge.common.MinecraftForge;

@@ -1,14 +1,18 @@
 package com.vincentmet.mkm;
 
 import com.google.gson.*;
+import com.vincentmet.mkm.normalmacros.MacroManager;
+import com.vincentmet.mkm.normalmacros.MacroSet;
+import com.vincentmet.mkm.timedmacros.TimedMacroManager;
+import com.vincentmet.mkm.timedmacros.TimedMacro;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Time;
 
 public class Config {
-
     public static void processJson(JsonObject json){
         MacroManager.clear();
         if(json.has("macro_sets")){
@@ -24,6 +28,20 @@ public class Config {
                 });
             }
         }
+        TimedMacroManager.clear();
+        if(json.has("timed_macros")){
+            JsonElement jsonElementTimedMacros = json.get("timed_macros");
+            if(jsonElementTimedMacros.isJsonArray()){
+                JsonArray jsonArrayTimedMacros = jsonElementTimedMacros.getAsJsonArray();
+                jsonArrayTimedMacros.forEach(jsonArrayEntryElement -> {
+                    if(jsonArrayEntryElement.isJsonObject()){
+                        TimedMacro newSet = new TimedMacro();
+                        newSet.processJson(jsonArrayEntryElement.getAsJsonObject());
+                        TimedMacroManager.addTimedMacro(newSet);
+                    }
+                });
+            }
+        }
         MacroManager.setCurrentMacroSetId(0);
     }
 
@@ -33,7 +51,12 @@ public class Config {
         MacroManager.getAllMacros().forEach(set -> {
             jsonArrayMacroSets.add(set.getJson());
         });
+        JsonArray jsonArrayTimedMacros = new JsonArray();
+        TimedMacroManager.getAllTimedMacros().forEach(set -> {
+            jsonArrayTimedMacros.add(set.getJson());
+        });
         json.add("macro_sets", jsonArrayMacroSets);
+        json.add("timed_macros", jsonArrayTimedMacros);
         return json;
     }
 

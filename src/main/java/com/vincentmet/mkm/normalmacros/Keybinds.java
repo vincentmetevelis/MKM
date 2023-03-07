@@ -1,4 +1,4 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.normalmacros;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;

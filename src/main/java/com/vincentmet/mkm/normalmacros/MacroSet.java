@@ -1,10 +1,11 @@
-package com.vincentmet.mkm;
+package com.vincentmet.mkm.normalmacros;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-public class MacroSet {
+public class MacroSet {//todo allow for name
+    private String name = "A Set of Macro's";
     private String macro0 = "";
     private String macro1 = "";
     private String macro2 = "";
@@ -17,6 +18,16 @@ public class MacroSet {
     private String macro9 = "";
 
     public void processJson(JsonObject json){
+        if(json.has("name")){
+            JsonElement jsonElement = json.get("name");
+            if(jsonElement.isJsonPrimitive()){
+                JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+                if(jsonPrimitive.isString()){
+                    name = jsonPrimitive.getAsString();
+                }else{name = "A Set of Macro's";}
+            }else{name = "A Set of Macro's";}
+        }else{name = "A Set of Macro's";}
+
         if(json.has("macro0")){
             JsonElement jsonElement = json.get("macro0");
             if(jsonElement.isJsonPrimitive()){
@@ -120,6 +131,7 @@ public class MacroSet {
 
     public JsonObject getJson(){
         JsonObject json = new JsonObject();
+        json.addProperty("name", name);
         json.addProperty("macro0", macro0);
         json.addProperty("macro1", macro1);
         json.addProperty("macro2", macro2);
@@ -131,6 +143,10 @@ public class MacroSet {
         json.addProperty("macro8", macro8);
         json.addProperty("macro9", macro9);
         return json;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getMacro0() {
@@ -171,6 +187,10 @@ public class MacroSet {
 
     public String getMacro9() {
         return macro9;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setMacro0(String macro0) {

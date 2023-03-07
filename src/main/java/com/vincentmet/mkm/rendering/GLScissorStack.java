@@ -26,7 +26,7 @@ public class GLScissorStack{
         }
     }
     
-    private static XYWidthHeight getIntersectionArea(){
+    public static XYWidthHeight getIntersectionArea(){
         int newX = STACK.stream().map(StackEntry::getX).reduce(Math::max).orElse(0);
         int newY = STACK.stream().map(StackEntry::getY).reduce(Math::max).orElse(0);
         return new XYWidthHeight(
