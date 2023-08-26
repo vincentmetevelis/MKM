@@ -91,6 +91,16 @@ public class TimedMacroGuiLine implements IRenderable, GuiEventListener {//todo 
     }
 
     @Override
+    public void setFocused(boolean p_265728_) {
+
+    }
+
+    @Override
+    public boolean isFocused() {
+        return false;
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double dyScroll) {
         macroTextField.mouseScrolled(mouseX, mouseY, dyScroll);
         timingTextField.mouseScrolled(mouseX, mouseY, dyScroll);

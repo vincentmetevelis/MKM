@@ -120,6 +120,16 @@ public class VariableButton implements GuiEventListener {
 		return true;
 	}
 
+	@Override
+	public void setFocused(boolean p_265728_) {
+
+	}
+
+	@Override
+	public boolean isFocused() {
+		return false;
+	}
+
 	public IntSupplier getX(){
 		return x;
 	}

@@ -243,6 +243,16 @@ public class SingleLineTextField implements GuiEventListener {
         return true;
     }
 
+    @Override
+    public void setFocused(boolean p_265728_) {
+
+    }
+
+    @Override
+    public boolean isFocused() {
+        return false;
+    }
+
     public boolean mouseClicked(double mouseX, double mouseY, int button){
         if(MacroScreen.isMouseInBounds(mouseX, mouseY, TEXTAREA_X.getAsInt(), INSIDE_BOX_Y.getAsInt() - scrollingDistance, TEXTAREA_X.getAsInt() + TEXTAREA_WIDTH.getAsInt(), INSIDE_BOX_Y.getAsInt() - scrollingDistance + INSIDE_BOX_HEIGHT.getAsInt())){
             isFocused = true;
