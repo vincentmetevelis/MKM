@@ -1,10 +1,10 @@
 modLoader="javafml"
-loaderVersion="[45,)"
+loaderVersion="[47,)"
 credits="vincentmet"
 license="All Rights Reserved"
 [[mods]]
 modId="mkm"
-version="1.19.4-2.3.0"
+version="1.20.1-2.3.0"
 displayName="Macro Keybind Mod"
 description='''
 Macro!!!Macro!!!Macro!!!

@@ -1,24 +1,20 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
-version = '1.19.4-2.3.0'
+version = '1.20.1-2.3.0'
 group = 'com.vincentmet.mkm'
-archivesBaseName = 'mkm'
+base{
+    archivesName = 'mkm'
+}
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: 'official', version: '1.19.4'
+    mappings channel: 'official', version: '1.20.1'
     runs {
         client {
             workingDirectory project.file('run')
@@ -32,5 +28,5 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.19.4-45.1.16"
+    minecraft "net.minecraftforge:forge:1.20.1-47.1.44"
 }

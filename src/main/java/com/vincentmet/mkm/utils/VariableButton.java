@@ -4,14 +4,12 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.mkm.BaseClass;
-import com.vincentmet.mkm.normalmacros.MacroManager;
 import com.vincentmet.mkm.normalmacros.MacroScreen;
 import com.vincentmet.mkm.rendering.Color;
 import com.vincentmet.mkm.rendering.GLScissorStack;
 import com.vincentmet.mkm.rendering.ScrollingLabel;
-import com.vincentmet.mkm.utils.MouseButton;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -51,12 +49,12 @@ public class VariableButton implements GuiEventListener {
 		text.setParentScrollingDistance(scrollingDistance);
 	}
 	
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		internalRender(matrixStack, mouseX, mouseY, partialTicks, texture);
+	public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
+		internalRender(stack, mouseX, mouseY, partialTicks, texture);
 	}
 	
-	private void internalRender(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, ButtonTexture texture){
-		GLScissorStack.push(matrixStack, x.getAsInt(), y.getAsInt() - scrollingDistance, width.getAsInt(), height.getAsInt());
+	private void internalRender(GuiGraphics stack, int mouseX, int mouseY, float partialTicks, ButtonTexture texture){
+		GLScissorStack.push(stack.pose(), x.getAsInt(), y.getAsInt() - scrollingDistance, width.getAsInt(), height.getAsInt());
 		Color.color(0xFFFFFFFF);
 		Lighting.setupForFlatItems();
 
@@ -73,10 +71,10 @@ public class VariableButton implements GuiEventListener {
 		int texRight = texU + texture.getWidth() - texP;
 		int texBottom = texV + texture.getWidth() - texP;
 		
-		GuiComponent.blit(matrixStack, x.getAsInt(), y.getAsInt() - scrollingDistance, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
-		GuiComponent.blit(matrixStack, right, y.getAsInt() - scrollingDistance, texRight, texV, texP, texP, texWidth, texHeight);// Right Top corner
-		GuiComponent.blit(matrixStack, right, bottom, texRight, texBottom, texP, texP, texWidth, texHeight);// Right Bottom corner
-		GuiComponent.blit(matrixStack, x.getAsInt(), bottom, texU, texBottom, texP, texP, texWidth, texHeight);// Left Bottom corner
+		stack.blit(texture.getTexture(), x.getAsInt(), y.getAsInt() - scrollingDistance, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
+		stack.blit(texture.getTexture(), right, y.getAsInt() - scrollingDistance, texRight, texV, texP, texP, texWidth, texHeight);// Right Top corner
+		stack.blit(texture.getTexture(), right, bottom, texRight, texBottom, texP, texP, texWidth, texHeight);// Right Bottom corner
+		stack.blit(texture.getTexture(), x.getAsInt(), bottom, texU, texBottom, texP, texP, texWidth, texHeight);// Left Bottom corner
 		
 		
 		int strippedButtonTexWidth = texture.getWidth() - 2*texP;
@@ -84,24 +82,24 @@ public class VariableButton implements GuiEventListener {
 		
 		for (int left = x.getAsInt() + texP; left < right; left += strippedButtonTexWidth) {// Fill the Middle
 			for (int top = y.getAsInt() - scrollingDistance + texP; top < bottom; top += strippedButtonTexHeight) {
-				GuiComponent.blit(matrixStack, left, top, texU + texP, texV + texP, Math.min(strippedButtonTexWidth, right - left), Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);
+				stack.blit(texture.getTexture(), left, top, texU + texP, texV + texP, Math.min(strippedButtonTexWidth, right - left), Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);
 			}
 		}
 		for (int left = x.getAsInt() + texP; left < right; left += strippedButtonTexWidth) {// Top and Bottom Edges
-			GuiComponent.blit(matrixStack, left, y.getAsInt() - scrollingDistance, texU + texP, texV, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Top
-			GuiComponent.blit(matrixStack, left, bottom, texU + texP, texBottom, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Bottom
+			stack.blit(texture.getTexture(), left, y.getAsInt() - scrollingDistance, texU + texP, texV, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Top
+			stack.blit(texture.getTexture(), left, bottom, texU + texP, texBottom, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Bottom
 		}
 		for (int top = y.getAsInt() - scrollingDistance + texP; top < bottom; top += strippedButtonTexHeight) {// Left and Right Edges
-			GuiComponent.blit(matrixStack, x.getAsInt(), top, texU, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Left
-			GuiComponent.blit(matrixStack, right, top, texRight, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Right
+			stack.blit(texture.getTexture(), x.getAsInt(), top, texU, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Left
+			stack.blit(texture.getTexture(), right, top, texRight, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Right
 		}
-		text.render(matrixStack, mouseX, mouseY, partialTicks);
+		text.render(stack, mouseX, mouseY, partialTicks);
 		if(MacroScreen.isMouseInBounds(mouseX, mouseY, x.getAsInt(), y.getAsInt() - scrollingDistance, x.getAsInt()+width.getAsInt(), y.getAsInt() - scrollingDistance + height.getAsInt()) && texture == ButtonTexture.DEFAULT_NORMAL){
 			if(MacroScreen.isMouseInBounds(mouseX, mouseY, GLScissorStack.getIntersectionArea().getX(), GLScissorStack.getIntersectionArea().getY(), GLScissorStack.getIntersectionArea().getX() + GLScissorStack.getIntersectionArea().getWidth(), GLScissorStack.getIntersectionArea().getY() + GLScissorStack.getIntersectionArea().getHeight())){
-				internalRender(matrixStack, mouseX, mouseY, partialTicks, ButtonTexture.DEFAULT_PRESSED);
+				internalRender(stack, mouseX, mouseY, partialTicks, ButtonTexture.DEFAULT_PRESSED);
 			}
 		}
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop(stack.pose());
 	}
 	
 	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton){

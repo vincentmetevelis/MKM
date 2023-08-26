@@ -9,6 +9,7 @@ import com.vincentmet.mkm.rendering.GLScissorStack;
 import com.vincentmet.mkm.rendering.ScrollingLabel;
 import com.vincentmet.mkm.utils.IntCounter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.util.Lazy;
@@ -109,9 +110,9 @@ public class MacroScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        fill(stack, 0, 0, width, height, 0x88000000);
-        fill(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerX.getAsInt() + dataContainerWidth.getAsInt(), dataContainerY.getAsInt() + dataContainerHeight.getAsInt(), 0x88000000);
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
+        stack.fill(0, 0, width, height, 0x88000000);
+        stack.fill(dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerX.getAsInt() + dataContainerWidth.getAsInt(), dataContainerY.getAsInt() + dataContainerHeight.getAsInt(), 0x88000000);
         buttonPrev.render(stack, mouseX, mouseY, partialTicks);
         labelWhichSet.render(stack, mouseX, mouseY, partialTicks);
         buttonAddNewSet.render(stack, mouseX, mouseY, partialTicks);
@@ -119,15 +120,15 @@ public class MacroScreen extends Screen {
         buttonNext.render(stack, mouseX, mouseY, partialTicks);
         buttonSaveAll.render(stack, mouseX, mouseY, partialTicks);
         buttonSwitchToTimedMacroScreen.render(stack, mouseX, mouseY, partialTicks);
-        GLScissorStack.push(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerWidth.getAsInt(), dataContainerHeight.getAsInt());
+        GLScissorStack.push(stack.pose(), dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerWidth.getAsInt(), dataContainerHeight.getAsInt());
         int i = 0;
         for(Lazy<MacroKeybindWrapper> keybind : Keybinds.getAllMacros()){
             int localY = dataContainerY.getAsInt() - scrollDistance + 20*i;//todo apply this logic to TimedMacroGuiLine
-            drawString(stack, font, keybind.get().getTranslation(), dataContainerX.getAsInt() + 20, localY + ((20>>1) - (font.lineHeight>>1)), 0xFFFFFF);
+            stack.drawString(font, keybind.get().getTranslation(), dataContainerX.getAsInt() + 20, localY + ((20>>1) - (font.lineHeight>>1)), 0xFFFFFF);
             ALL_FIELDS.forEach(singleLineTextField -> singleLineTextField.render(stack, mouseX, mouseY, partialTicks));
             i++;
         }
-        GLScissorStack.pop(stack);
+        GLScissorStack.pop(stack.pose());
     }
     
     @Override

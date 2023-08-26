@@ -3,9 +3,8 @@ package com.vincentmet.mkm.utils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.mkm.normalmacros.MacroScreen;
 import com.vincentmet.mkm.rendering.GLScissorStack;
-import com.vincentmet.mkm.utils.Selection;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.lwjgl.glfw.GLFW;
 
@@ -61,36 +60,36 @@ public class SingleLineTextField implements GuiEventListener {
         this.setToMaxCursorPos();
     }
 
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        GuiComponent.fill(matrixStack, TEXTBOX_X.getAsInt(), TEXTBOX_Y.getAsInt() - scrollingDistance, TEXTBOX_X.getAsInt() + TEXTBOX_WIDTH.getAsInt(), TEXTBOX_Y.getAsInt() - scrollingDistance + TEXTBOX_HEIGHT.getAsInt(), borderColor);
-        GuiComponent.fill(matrixStack, INSIDE_BOX_X.getAsInt(), INSIDE_BOX_Y.getAsInt() - scrollingDistance, INSIDE_BOX_X.getAsInt() + INSIDE_BOX_WIDTH.getAsInt(), INSIDE_BOX_Y.getAsInt() - scrollingDistance + INSIDE_BOX_HEIGHT.getAsInt(), backgroundColor);
-        renderSelection(matrixStack, mouseX, mouseY, partialTicks);
-        GLScissorStack.push(matrixStack, TEXTAREA_X.getAsInt(), TEXTAREA_Y.getAsInt() - scrollingDistance, TEXTAREA_WIDTH.getAsInt(), TEXTAREA_HEIGHT.getAsInt());
-        Minecraft.getInstance().font.draw(matrixStack, text, TEXTAREA_X.getAsInt() - getOffset(), TEXTAREA_Y.getAsInt()-scrollingDistance, textColor);
-        GLScissorStack.pop(matrixStack);
-        renderCursor(matrixStack, mouseX, mouseY, partialTicks);
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks){
+        stack.fill(TEXTBOX_X.getAsInt(), TEXTBOX_Y.getAsInt() - scrollingDistance, TEXTBOX_X.getAsInt() + TEXTBOX_WIDTH.getAsInt(), TEXTBOX_Y.getAsInt() - scrollingDistance + TEXTBOX_HEIGHT.getAsInt(), borderColor);
+        stack.fill(INSIDE_BOX_X.getAsInt(), INSIDE_BOX_Y.getAsInt() - scrollingDistance, INSIDE_BOX_X.getAsInt() + INSIDE_BOX_WIDTH.getAsInt(), INSIDE_BOX_Y.getAsInt() - scrollingDistance + INSIDE_BOX_HEIGHT.getAsInt(), backgroundColor);
+        renderSelection(stack, mouseX, mouseY, partialTicks);
+        GLScissorStack.push(stack.pose(), TEXTAREA_X.getAsInt(), TEXTAREA_Y.getAsInt() - scrollingDistance, TEXTAREA_WIDTH.getAsInt(), TEXTAREA_HEIGHT.getAsInt());
+        stack.drawString(Minecraft.getInstance().font, text, TEXTAREA_X.getAsInt() - getOffset(), TEXTAREA_Y.getAsInt()-scrollingDistance, textColor);
+        GLScissorStack.pop(stack.pose());
+        renderCursor(stack, mouseX, mouseY, partialTicks);
     }
 
-    private void renderSelection(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+    private void renderSelection(GuiGraphics stack, int mouseX, int mouseY, float partialTicks){
         selection.setMaxLength(text.length());
         if (selection.isAnythingSelected()){
             int glScissorBoxX = TEXTAREA_X.getAsInt();
             int glScissorBoxY = TEXTAREA_Y.getAsInt() - scrollingDistance - 1;
             int glScissorBoxWidth = TEXTAREA_X.getAsInt() + TEXTAREA_WIDTH.getAsInt();
             int glScissorBoxHeight = TEXTAREA_Y.getAsInt() - scrollingDistance + TEXTAREA_HEIGHT.getAsInt() + 1;
-            GLScissorStack.push(matrixStack, glScissorBoxX, glScissorBoxY, glScissorBoxWidth, glScissorBoxHeight);
+            GLScissorStack.push(stack.pose(), glScissorBoxX, glScissorBoxY, glScissorBoxWidth, glScissorBoxHeight);
             int selectionBoxX = TEXTAREA_X.getAsInt() - getOffset() + getWidthForNChars(selection.getPos1());
             int selectionBoxY = TEXTAREA_Y.getAsInt() - scrollingDistance - 1;
             int selectionBoxWidth = TEXTAREA_X.getAsInt() - getOffset() + getWidthForNChars(selection.getPos2());
             int selectionBoxHeight = TEXTAREA_Y.getAsInt() - scrollingDistance + TEXTAREA_HEIGHT.getAsInt() + 1;
-            GuiComponent.fill(matrixStack, selectionBoxX, selectionBoxY, selectionBoxWidth, selectionBoxHeight, selectionColor);
-            GLScissorStack.pop(matrixStack);
+            stack.fill(selectionBoxX, selectionBoxY, selectionBoxWidth, selectionBoxHeight, selectionColor);
+            GLScissorStack.pop(stack.pose());
         }
     }
     
-    private void renderCursor(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+    private void renderCursor(GuiGraphics stack, int mouseX, int mouseY, float partialTicks){
         if(isFocused && System.currentTimeMillis()%1000>=500){
-            GuiComponent.fill(matrixStack, TEXTAREA_X.getAsInt() + getCursorPosInPx() - getOffset(), TEXTAREA_Y.getAsInt() - scrollingDistance - 1, TEXTAREA_X.getAsInt() + getCursorPosInPx() - getOffset() + 1, TEXTAREA_Y.getAsInt() - scrollingDistance + TEXTAREA_HEIGHT.getAsInt() + 1, cursorColor);
+            stack.fill(TEXTAREA_X.getAsInt() + getCursorPosInPx() - getOffset(), TEXTAREA_Y.getAsInt() - scrollingDistance - 1, TEXTAREA_X.getAsInt() + getCursorPosInPx() - getOffset() + 1, TEXTAREA_Y.getAsInt() - scrollingDistance + TEXTAREA_HEIGHT.getAsInt() + 1, cursorColor);
         }
     }
 

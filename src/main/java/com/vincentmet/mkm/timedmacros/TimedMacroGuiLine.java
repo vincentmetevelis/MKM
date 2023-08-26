@@ -1,15 +1,13 @@
 package com.vincentmet.mkm.timedmacros;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.mkm.rendering.IRenderable;
 import com.vincentmet.mkm.rendering.ScrollingLabel;
-import com.vincentmet.mkm.utils.BooleanContainer;
 import com.vincentmet.mkm.utils.SingleLineTextField;
 import com.vincentmet.mkm.utils.VariableButton;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraftforge.common.MinecraftForge;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.function.IntSupplier;
 
@@ -61,7 +59,7 @@ public class TimedMacroGuiLine implements IRenderable, GuiEventListener {//todo 
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
         label.render(stack, mouseX, mouseY, partialTicks);
         macroTextField.render(stack, mouseX, mouseY, partialTicks);
         timingTextField.render(stack, mouseX, mouseY, partialTicks);

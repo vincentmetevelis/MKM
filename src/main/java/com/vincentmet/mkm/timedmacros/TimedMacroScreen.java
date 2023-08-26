@@ -8,6 +8,7 @@ import com.vincentmet.mkm.rendering.ScrollingLabel;
 import com.vincentmet.mkm.utils.IntCounter;
 import com.vincentmet.mkm.utils.VariableButton;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.MinecraftForge;
@@ -79,16 +80,16 @@ public class TimedMacroScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
-        fill(stack, 0, 0, width, height, 0x88000000);
-        fill(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerX.getAsInt() + dataContainerWidth.getAsInt(), dataContainerY.getAsInt() + dataContainerHeight.getAsInt(), 0x88000000);
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks) {
+        stack.fill(0, 0, width, height, 0x88000000);
+        stack.fill(dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerX.getAsInt() + dataContainerWidth.getAsInt(), dataContainerY.getAsInt() + dataContainerHeight.getAsInt(), 0x88000000);
         labelTitle.render(stack, mouseX, mouseY, partialTicks);
         buttonAddNewEntry.render(stack, mouseX, mouseY, partialTicks);
         buttonSaveAll.render(stack, mouseX, mouseY, partialTicks);
         buttonSwitchToNormalMacrosScreen.render(stack, mouseX, mouseY, partialTicks);
-        GLScissorStack.push(stack, dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerWidth.getAsInt(), dataContainerHeight.getAsInt());
+        GLScissorStack.push(stack.pose(), dataContainerX.getAsInt(), dataContainerY.getAsInt(), dataContainerWidth.getAsInt(), dataContainerHeight.getAsInt());
         ALL_TIMED_MACRO_FIELDS.forEach(timedMacroGuiLine -> timedMacroGuiLine.render(stack, mouseX, mouseY, partialTicks));
-        GLScissorStack.pop(stack);
+        GLScissorStack.pop(stack.pose());
     }
     
     @Override

@@ -1,8 +1,8 @@
 package com.vincentmet.mkm.rendering;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.function.IntSupplier;
 
@@ -29,8 +29,8 @@ public class ScrollingLabel implements IRenderable{
     }
     
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        GLScissorStack.push(matrixStack, x.getAsInt(), y.getAsInt() - parentScrollingDistance, maxWidth.getAsInt(), FONT.lineHeight);
+    public void render(GuiGraphics stack, int mouseX, int mouseY, float partialTicks){
+        GLScissorStack.push(stack.pose(), x.getAsInt(), y.getAsInt() - parentScrollingDistance, maxWidth.getAsInt(), FONT.lineHeight);
         if(this.maxOffset.getAsInt() >= 0){
             int currentOffset = Math.min((int)((System.currentTimeMillis()/50/scrollingSpeed)%(textWidth.getAsInt()+beginEndPauseDuration*2)), maxOffset.getAsInt() + 2*this.beginEndPauseDuration);
             int localOffsetPause;
@@ -39,11 +39,11 @@ public class ScrollingLabel implements IRenderable{
             }else{
                 localOffsetPause = Math.min(currentOffset - beginEndPauseDuration, maxOffset.getAsInt());
             }
-            FONT.drawShadow(matrixStack, text, x.getAsInt()-localOffsetPause, y.getAsInt() - parentScrollingDistance, 0xFFFFFF);//stack, text, x, y, color
+            stack.drawString(FONT, text, x.getAsInt()-localOffsetPause, y.getAsInt() - parentScrollingDistance, 0xFFFFFF);//stack, text, x, y, color
         }else{
-            FONT.drawShadow(matrixStack, text, x.getAsInt(), y.getAsInt() - parentScrollingDistance, 0xFFFFFF);//stack, text, x, y, color
+            stack.drawString(FONT, text, x.getAsInt(), y.getAsInt() - parentScrollingDistance, 0xFFFFFF);//stack, text, x, y, color
         }
-        GLScissorStack.pop(matrixStack);
+        GLScissorStack.pop(stack.pose());
     }
 
     public void setParentScrollingDistance(int parentScrollingDistance) {
